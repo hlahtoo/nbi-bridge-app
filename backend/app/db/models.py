@@ -1,7 +1,7 @@
-from sqlalchemy import Column, String, Integer, Float, CHAR
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from app.db.session import Base  # Use shared Base
+from sqlalchemy import Column, String, Integer, Float, CHAR, Date, ForeignKey
+from sqlalchemy.orm import relationship
+from geoalchemy2 import Geometry
 
 class BridgeFieldMetadata(Base):
     __tablename__ = "bridge_field_metadata"
@@ -25,7 +25,7 @@ class BridgeCore(Base):
     county_code_003 = Column(CHAR(3))
     place_code_004 = Column(CHAR(5))
     critical_facility_006b = Column(CHAR(1))
-    facility_carried_007 = Column(String(18))
+    facility_carried_007 = Column(String(50))
     lat_016 = Column(Float)
     long_017 = Column(Float)
     geom = Column(Geometry(geometry_type='POINT', srid=4326))
@@ -68,8 +68,8 @@ class BridgeDetails(Base):
 
     structure_number_008 = Column(String(15), ForeignKey("bridge_core.structure_number_008"), primary_key=True)
 
-    features_desc_006a = Column(String(24))
-    location_009 = Column(String(25))
+    features_desc_006a = Column(String(50))
+    location_009 = Column(String(50))
     min_vert_clr_010 = Column(Float)
     kilometerpoint_011 = Column(Float)
     base_hwy_network_012 = Column(CHAR(1))
