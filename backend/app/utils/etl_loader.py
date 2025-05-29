@@ -41,13 +41,8 @@ def load_bridges_from_txt(file_path: str):
                 record_type_005a=row["RECORD_TYPE_005A"],
                 route_prefix_005b=row["ROUTE_PREFIX_005B"],
                 service_level_005c=row["SERVICE_LEVEL_005C"],
-                route_number_005d=row["ROUTE_NUMBER_005D"],
-                direction_005e=row["DIRECTION_005E"],
-                highway_district_002=row["HIGHWAY_DISTRICT_002"],
-                county_code_003=row["COUNTY_CODE_003"],
-                place_code_004=row["PLACE_CODE_004"],
-                critical_facility_006b=row["CRITICAL_FACILITY_006B"],
-                facility_carried_007=row["FACILITY_CARRIED_007"],
+
+                location_009=row["LOCATION_009"],
                 lat_016=lat,
                 long_017=lon,
                 geom=geom,
@@ -58,15 +53,9 @@ def load_bridges_from_txt(file_path: str):
                 traffic_lanes_on_028a=int(row["TRAFFIC_LANES_ON_028A"]) if row["TRAFFIC_LANES_ON_028A"].isdigit() else None,
                 traffic_lanes_und_028b=int(row["TRAFFIC_LANES_UND_028B"]) if row["TRAFFIC_LANES_UND_028B"].isdigit() else None,
                 adt_029=int(row["ADT_029"]) if row["ADT_029"].isdigit() else None,
-                year_adt_030=int(row["YEAR_ADT_030"]) if row["YEAR_ADT_030"].isdigit() else None,
+                
                 design_load_031=row["DESIGN_LOAD_031"],
-                railings_036a=row["RAILINGS_036A"],
-                transitions_036b=row["TRANSITIONS_036B"],
-                appr_rail_036c=row["APPR_RAIL_036C"],
-                appr_rail_end_036d=row["APPR_RAIL_END_036D"],
-                open_closed_posted_041=row["OPEN_CLOSED_POSTED_041"],
-                service_on_042a=row["SERVICE_ON_042A"],
-                service_und_042b=row["SERVICE_UND_042B"],
+
                 structure_kind_043a=row["STRUCTURE_KIND_043A"],
                 structure_type_043b=row["STRUCTURE_TYPE_043B"],
                 deck_cond_058=row["DECK_COND_058"],
@@ -74,22 +63,24 @@ def load_bridges_from_txt(file_path: str):
                 substructure_cond_060=row["SUBSTRUCTURE_COND_060"],
                 channel_cond_061=row["CHANNEL_COND_061"],
                 culvert_cond_062=row["CULVERT_COND_062"],
-                strahnet_highway_100=row["STRAHNET_HIGHWAY_100"],
-                traffic_direction_102=row["TRAFFIC_DIRECTION_102"],
-                highway_system_104=row["HIGHWAY_SYSTEM_104"],
-                federal_lands_105=row["FEDERAL_LANDS_105"],
+
                 year_reconstructed_106=int(row["YEAR_RECONSTRUCTED_106"]) if row["YEAR_RECONSTRUCTED_106"].isdigit() else None,
-                bridge_condition=int(row["BRIDGE_CONDITION"]) if row["BRIDGE_CONDITION"].isdigit() else None,
+                bridge_condition=row["BRIDGE_CONDITION"],
                 lowest_rating=int(row["LOWEST_RATING"]) if row["LOWEST_RATING"].isdigit() else None,
                 deck_area=float(row["DECK_AREA"]) if row["DECK_AREA"] else None,
-                fed_agency=row["FED_AGENCY"],
-                submitted_by=row["SUBMITTED_BY"]
+
             )
 
             details = BridgeDetails(
                 structure_number_008=row["STRUCTURE_NUMBER_008"].strip(),
                 features_desc_006a=row["FEATURES_DESC_006A"],
-                location_009=row["LOCATION_009"],
+                route_number_005d=row["ROUTE_NUMBER_005D"],
+                direction_005e=row["DIRECTION_005E"],
+                highway_district_002=row["HIGHWAY_DISTRICT_002"],
+                county_code_003=row["COUNTY_CODE_003"],
+                place_code_004=row["PLACE_CODE_004"],
+                critical_facility_006b=row["CRITICAL_FACILITY_006B"],
+                facility_carried_007=row["FACILITY_CARRIED_007"],
                 min_vert_clr_010=float(row["MIN_VERT_CLR_010"]) if row["MIN_VERT_CLR_010"] else None,
                 kilometerpoint_011=float(row["KILOPOINT_011"]) if row["KILOPOINT_011"] else None,
                 base_hwy_network_012=row["BASE_HWY_NETWORK_012"],
@@ -97,14 +88,22 @@ def load_bridges_from_txt(file_path: str):
                 subroute_no_013b=row["SUBROUTE_NO_013B"],
                 detour_kilos_019=int(row["DETOUR_KILOS_019"]) if row["DETOUR_KILOS_019"].isdigit() else None,
                 toll_020=row["TOLL_020"],
+                year_adt_030=int(row["YEAR_ADT_030"]) if row["YEAR_ADT_030"].isdigit() else None,
                 appr_width_mt_032=float(row["APPR_WIDTH_MT_032"]) if row["APPR_WIDTH_MT_032"] else None,
                 median_code_033=row["MEDIAN_CODE_033"],
                 degrees_skew_034=int(row["DEGREES_SKEW_034"]) if row["DEGREES_SKEW_034"].isdigit() else None,
                 structure_flared_035=row["STRUCTURE_FLARED_035"],
+                railings_036a=row["RAILINGS_036A"],
+                transitions_036b=row["TRANSITIONS_036B"],
+                appr_rail_036c=row["APPR_RAIL_036C"],
+                appr_rail_end_036d=row["APPR_RAIL_END_036D"],
                 history_037=row["HISTORY_037"],
                 navigation_038=row["NAVIGATION_038"],
                 nav_vert_clr_mt_039=float(row["NAV_VERT_CLR_MT_039"]) if row["NAV_VERT_CLR_MT_039"] else None,
                 nav_horr_clr_mt_040=float(row["NAV_HORR_CLR_MT_040"]) if row["NAV_HORR_CLR_MT_040"] else None,
+                open_closed_posted_041=row["OPEN_CLOSED_POSTED_041"],
+                service_on_042a=row["SERVICE_ON_042A"],
+                service_und_042b=row["SERVICE_UND_042B"],
                 operating_rating_064=float(row["OPERATING_RATING_064"]) if row["OPERATING_RATING_064"] else None,
                 opr_rating_meth_063=row["OPR_RATING_METH_063"],
                 inventory_rating_066=float(row["INVENTORY_RATING_066"]) if row["INVENTORY_RATING_066"] else None,
@@ -147,6 +146,12 @@ def load_bridges_from_txt(file_path: str):
                 future_adt_114=int(row["FUTURE_ADT_114"]) if row["FUTURE_ADT_114"].isdigit() else None,
                 year_of_future_adt_115=int(row["YEAR_OF_FUTURE_ADT_115"]) if row["YEAR_OF_FUTURE_ADT_115"].isdigit() else None,
                 min_nav_clr_mt_116=float(row["MIN_NAV_CLR_MT_116"]) if row["MIN_NAV_CLR_MT_116"] else None,
+                fed_agency=row["FED_AGENCY"],
+                submitted_by=row["SUBMITTED_BY"],
+                strahnet_highway_100=row["STRAHNET_HIGHWAY_100"],
+                traffic_direction_102=row["TRAFFIC_DIRECTION_102"],
+                highway_system_104=row["HIGHWAY_SYSTEM_104"],
+                federal_lands_105=row["FEDERAL_LANDS_105"],
             )
 
             bridge_core_objs.append(core)
@@ -164,5 +169,5 @@ def load_bridges_from_txt(file_path: str):
 
 
 if __name__ == "__main__":
-    # load_bridges_from_txt("app/db/data/PA22.txt")
-    load_bridges_from_txt("app/db/data/sample_bridges.txt")
+    load_bridges_from_txt("app/db/data/PA22.txt")
+    # load_bridges_from_txt("app/db/data/sample_bridges.txt")
