@@ -1,15 +1,19 @@
-# app/db/init_db.py
+"""
+Initializes the database by dropping and recreating all tables using SQLAlchemy.
+"""
 from sqlalchemy import inspect
 from app.db.session import engine
-from app.db.base import Base  # Base must import all models to work
+from app.db.base import Base 
 
 def init_db():
-    print("database initialized")
+    # Drop all tables (if exist) and recreate from metadata
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine) 
+  
+    # Log created tables for verification
     inspector = inspect(engine)
     print("Tables created:", inspector.get_table_names())
 
-# 👇 This line is essential
+
 if __name__ == "__main__":
     init_db()
