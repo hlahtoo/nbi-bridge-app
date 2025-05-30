@@ -2,6 +2,24 @@
 
 NBI Bridge Viewer is a full-stack geospatial web application that visualizes bridges from the National Bridge Inventory (NBI) dataset on an interactive map. It enables users to explore bridge infrastructure across the U.S., filter based on condition, traffic, or location, and fetch details using spatial tile-based queries for optimal performance.
 
+## Table of Contents
+
+- [Features](#features)
+- [Demo Screenshots](#demo-screenshots)
+- [System Design Diagram](#system-design-diagram)
+- [Getting Started](#getting-started)
+  - [1. Clone the Repo](#1-clone-the-repo)
+  - [2. Backend Setup (FastAPI)](#2-backend-setup-fastapi)
+  - [3. Frontend Setup (Nextjs)](#3-frontend-setup-nextjs)
+- [API Overview](#api-overview)
+  - [`GET /api/bridges`](#get-apibridges)
+  - [`POST /api/bridges/batch`](#post-apibridgesbatch)
+  - [`GET /api/bridges/detail/{structure_number}`](#get-apibridgesdetailstructure_number)
+  - [Data Sources](#data-sources)
+- [Frontend Overview](#frontend-overview)
+  - [Key Features](#key-features)
+- [Security Considerations](#security-considerations)
+
 ## Features
 
 - Interactive Leaflet map with real-time tile-based bridge loading
@@ -29,6 +47,52 @@ Displays bridges as markers on a Leaflet map. Users can pan and zoom to fetch br
 Clicking a bridge marker brings up a detailed popup showing condition ratings, year built, and other metadata.
 
 ![Bridge Detail](https://firebasestorage.googleapis.com/v0/b/commit-genie.firebasestorage.app/o/Bridge-app%2FScreenshot%202025-05-29%20at%202.49.34%E2%80%AFAM.png?alt=media&token=1dbf256c-e357-4bcc-a5b6-c91d3e81e993)
+
+## System Design Diagram
+
+```
++-------------------+
+|    End User       |
+| (Web Browser)     |
++--------+----------+
+         |
+         | HTTP Requests (Map Interactions, Filters)
+         v
++--------+----------+
+| React Frontend    | <== Built with React + Leaflet
+|-------------------|
+| - Map UI (Leaflet)|
+| - Filters (ADT,   |
+|   Condition, etc) |
+| - API Service     |
+| - Tile Caching    |
++--------+----------+
+         |
+         | REST API Calls (with lat/lng bounds, filters)
+         v
++--------+----------+
+| FastAPI Backend   |
+|-------------------|
+| - Endpoint Router |
+| - Bridge Query API|
+| - Filter Validator|
+| - Geo Bounding Box|
+|   Query Handler   |
++--------+----------+
+         |
+         | SQL Queries with Spatial Functions
+         v
++--------+----------+
+| PostgreSQL +      |
+| PostGIS Database  |
+|-------------------|
+| - Bridge Table    |
+| - Geometry Columns|
+| - Indexes (GIST)  |
+| - Preprocessed    |
+|   Tile Data       |
++--------+----------+
+```
 
 ## Getting Started
 
@@ -215,3 +279,11 @@ The frontend is built using **React** and **Leaflet**, offering an interactive m
   1. The frontend calculates the new visible tile keys.
   2. It filters out already fetched ones using the cache.
   3. It sends only new tiles to the backend for fresh data.
+
+## Security Considerations
+
+When hosting the React + Leaflet frontend and FastAPI backend on different servers (e.g. in production), it’s important to protect our API from unauthorized access. One simple way to do this is by setting up a shared secret key.
+
+The React app can send this secret key in a custom request header with each API call. The FastAPI backend will then check this key before processing the request. This helps ensure that only our official frontend can talk to the backend.
+
+To improve security even more, use proper CORS settings to only allow requests from our frontend’s domain.

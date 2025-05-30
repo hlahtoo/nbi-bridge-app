@@ -9,23 +9,28 @@ from sqlalchemy.orm import Session
 from app.db.models import BridgeCore, BridgeDetails
 from app.db.session import SessionLocal
 
-# Convert DMS (degrees, minutes, seconds) string to decimal format
+
 def convert_dms_to_decimal(value: str, is_latitude=True) -> float:
+    """
+    Convert DMS (degrees, minutes, seconds) string to decimal format
+    """
     value = value.zfill(8 if is_latitude else 9)
     if is_latitude:
         deg = int(value[:2])
         minutes = int(value[2:4])
-        seconds = float(value[4:])
+        seconds = float(value[4:])/100
     else:
         deg = int(value[:3])
         minutes = int(value[3:5])
-        seconds = float(value[5:])
+        seconds = float(value[5:])/100
     decimal = deg + (minutes / 60) + (seconds / 3600)
     return round(decimal if is_latitude else -decimal, 6)
 
 
-# Main function to load bridge records from a text file
 def load_bridges_from_txt(file_path: str):
+    """
+    Main function to load bridge records from a text file
+    """
     db = SessionLocal()
     df = pd.read_csv(file_path, dtype=str).fillna("")
 

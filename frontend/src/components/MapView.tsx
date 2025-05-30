@@ -1,6 +1,7 @@
+// Client-side rendered map view that fetches and filters NBI bridge data using tile-based spatial queries
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
 import L from "leaflet";
@@ -10,6 +11,8 @@ import { useTileFetcher } from "../hooks/useTileFetcher";
 import BridgePopup from "./BridgePopup";
 import MapEventHandler from "./MapEventHandler";
 delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+// Fix Leaflet icon path issues in Next.js
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/leaflet/marker-icon-2x.png",
   iconUrl: "/leaflet/marker-icon.png",
@@ -18,47 +21,72 @@ L.Icon.Default.mergeOptions({
 import { Bridge } from "@/types/types";
 
 export default function MapView() {
+  // Default map center (for Pennsylvania)
   const center: LatLngExpression = [41.2033, -77.1945];
   type Operator = ">=" | "<=";
 
-  const [mainFilter, setMainFilter] = useState("lowestRating");
-  const [limit, setLimit] = useState(100);
-  const [yearFilter, setYearFilter] = useState<number | null>(null);
-  const [yearOp, setYearOp] = useState<Operator>(">=");
-  const [lowestRating, setLowestRating] = useState<number | null>(null);
-  const [lowestRatingOp, setLowestRatingOp] = useState<Operator>(">=");
-  const [deckArea, setDeckArea] = useState<number | null>(null);
-  const [deckAreaOp, setDeckAreaOp] = useState<Operator>(">=");
-  const [adt, setAdt] = useState<number | null>(null);
-  const [adtOp, setAdtOp] = useState<Operator>(">=");
+  // UI filter state
+  const [filters, setFilters] = useState<{
+    mainFilter: string;
+    limit: number;
+    yearFilter: number | null;
+    yearOp: Operator;
+    lowestRating: number | null;
+    lowestRatingOp: Operator;
+    deckArea: number | null;
+    deckAreaOp: Operator;
+    adt: number | null;
+    adtOp: Operator;
+  }>({
+    mainFilter: "lowestRating",
+    limit: 100,
+    yearFilter: null,
+    yearOp: ">=",
+    lowestRating: null,
+    lowestRatingOp: ">=",
+    deckArea: null,
+    deckAreaOp: ">=",
+    adt: null,
+    adtOp: ">=",
+  });
 
+  // List of bridges to display
   const [bridges, setBridges] = useState<Bridge[]>([]);
 
+  // Re-fetch bridges whenever filter changes
   useEffect(() => {
     setBridges([]);
     clearCache();
-
-    // Trigger re-fetch for current tiles
     if (mapRef.current) {
       mapRef.current.fire("moveend");
     }
-  }, [mainFilter, limit]);
+  }, [filters.mainFilter, filters.limit]);
 
+  // Tile fetcher hook handles spatial fetching logic
   const { mapRef, onMoveEnd, clearCache } = useTileFetcher({
-    mainFilter,
-    limit,
-    fetchFromBackend: async (zoom, tileKeys, filterKey) => {
-      console.log("Fetching for", filterKey, "at zoom", zoom);
+    mainFilter: filters.mainFilter,
+    limit: filters.limit,
 
+    // Backend tile fetch function triggered by map movement or zoom level changes
+    fetchFromBackend: async (zoom, tileKeys, filterKey) => {
+      // Convert tileKeys like "tile_5_7" into [x, y] pairs
       const tiles = tileKeys.map((key) => {
         const [, x, y] = key.split("_").map(Number);
         return [x, y];
       });
 
+      /**
+       * Determine which query mode to use:
+       * - "single" mode (zoom < 10): fewer tiles, broader region, fewer bridges per tile.
+       *   Fetches top N bridges globally across the tiles (used for performance at low zoom).
+       * - "batch" mode (zoom >= 10): more tiles, finer detail.
+       *   Fetches top N bridges per tile (for more granular control).
+       */
       const mode = zoom < 10 ? "single" : "batch";
 
+      // Fetch bridge data from backend using selected mode and filters
       const res = await fetch(
-        `http://localhost:8000/api/bridges/batch?zoom=${zoom}&filterKey=${filterKey}&limit=${limit}`,
+        `http://localhost:8000/api/bridges/batch?zoom=${zoom}&filterKey=${filterKey}&limit=${filters.limit}`,
         {
           method: "POST",
           headers: {
@@ -76,26 +104,39 @@ export default function MapView() {
       const bridges = await res.json();
       return bridges;
     },
+
+    // Callback to update global bridge state when new data is loaded
     setBridges,
   });
 
-  const compare = (
-    value: number | undefined,
-    target: number | null,
-    op: Operator
-  ) => {
-    if (target === null || value === undefined) return true;
-    return op === ">=" ? value >= target : value <= target;
-  };
+  // Memoize the filtered bridge list to avoid unnecessary recalculations on every render
 
-  const finalFiltered = bridges.filter((b) => {
-    return (
-      compare(b.year_built_027, yearFilter, yearOp) &&
-      compare(b.lowest_rating, lowestRating, lowestRatingOp) &&
-      compare(b.deck_area, deckArea, deckAreaOp) &&
-      compare(b.adt_029, adt, adtOp)
+  const finalFiltered = useMemo(() => {
+    // Helper function to compare a bridge field value to the user's filter input.
+    const compare = (
+      value: number | undefined,
+      target: number | null,
+      op: Operator
+    ) => {
+      if (target === null || value === undefined) return true;
+      return op === ">=" ? value >= target : value <= target;
+    };
+
+    // Filter bridge list based on active sub-filters:
+    return bridges.filter(
+      (b) =>
+        compare(b.year_built_027, filters.yearFilter, filters.yearOp) &&
+        compare(
+          b.lowest_rating,
+          filters.lowestRating,
+          filters.lowestRatingOp
+        ) &&
+        compare(b.deck_area, filters.deckArea, filters.deckAreaOp) &&
+        compare(b.adt_029, filters.adt, filters.adtOp)
     );
-  });
+  }, [bridges, filters]); // useMemo dependencies: re-run only when bridges or filters change
+
+  // Initial fetch when map is ready
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -106,28 +147,10 @@ export default function MapView() {
 
   return (
     <div className="flex h-screen">
-      <Sidebar
-        mainFilter={mainFilter}
-        setMainFilter={setMainFilter}
-        limit={limit}
-        setLimit={setLimit}
-        yearFilter={yearFilter}
-        setYearFilter={setYearFilter}
-        yearOp={yearOp}
-        setYearOp={setYearOp}
-        lowestRating={lowestRating}
-        setLowestRating={setLowestRating}
-        lowestRatingOp={lowestRatingOp}
-        setLowestRatingOp={setLowestRatingOp}
-        deckArea={deckArea}
-        setDeckArea={setDeckArea}
-        deckAreaOp={deckAreaOp}
-        setDeckAreaOp={setDeckAreaOp}
-        adt={adt}
-        setAdt={setAdt}
-        adtOp={adtOp}
-        setAdtOp={setAdtOp}
-      />
+      {/* Sidebar UI with filters */}
+      <Sidebar filters={filters} setFilters={setFilters} />
+
+      {/* Leaflet Map Container */}
       <div className="flex-1">
         <MapContainer
           center={center}
@@ -135,11 +158,16 @@ export default function MapView() {
           style={{ height: "100%", width: "100%" }}
           ref={mapRef}
         >
+          {/* Base tile layer */}
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+
+          {/* Custom map movement handler */}
           <MapEventHandler onMoveEnd={onMoveEnd} />
+
+          {/* Render filtered bridge markers */}
           {finalFiltered.map((bridge, i) => (
             <Marker key={i} position={[bridge.lat_016, bridge.long_017]}>
               <Popup>

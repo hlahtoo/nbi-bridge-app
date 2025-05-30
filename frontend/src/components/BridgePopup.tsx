@@ -1,3 +1,5 @@
+// BridgePopup displays summary and detailed bridge info in a Leaflet popup, with zoom and dynamic data fetch support.
+
 import { useState } from "react";
 import { Map } from "leaflet";
 import { Bridge, BridgeDetail } from "@/types/types";
@@ -8,10 +10,11 @@ type BridgePopupProps = {
 };
 
 export default function BridgePopup({ bridge, map }: BridgePopupProps) {
-  const [showMore, setShowMore] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [detailedData, setDetailedData] = useState<BridgeDetail | null>(null);
+  const [showMore, setShowMore] = useState(false); // Toggle for showing detailed info
+  const [loading, setLoading] = useState(false); // Loading state for API call
+  const [detailedData, setDetailedData] = useState<BridgeDetail | null>(null); // Detailed bridge info
 
+  // Zoom into the map centered on this bridge (limited to zoom level 18)
   const zoomToBridgeStep = () => {
     if (!map) return;
     const currentZoom = map.getZoom();
@@ -19,6 +22,7 @@ export default function BridgePopup({ bridge, map }: BridgePopupProps) {
     map.setView([bridge.lat_016, bridge.long_017], newZoom, { animate: true });
   };
 
+  // Fetch more detailed bridge info from backend API
   const fetchDetail = async () => {
     setLoading(true);
     try {
@@ -36,6 +40,7 @@ export default function BridgePopup({ bridge, map }: BridgePopupProps) {
     }
   };
 
+  // Reusable row for displaying label + value
   const Row = ({
     label,
     value,
@@ -53,13 +58,14 @@ export default function BridgePopup({ bridge, map }: BridgePopupProps) {
 
   return (
     <div className="w-72 max-h-96 flex flex-col text-sm text-gray-700">
-      {/* Title */}
+      {/* Header */}
       <div className="border-b px-3 pb-2 pt-3">
         <h2 className="text-xl font-semibold text-gray-800">Bridge Details</h2>
       </div>
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-3">
+        {/* Summary fields */}
         <div className="grid grid-cols-2 gap-x-2 gap-y-1">
           <Row label="Structure #" value={bridge.structure_number_008} />
           <Row label="Latitude" value={bridge.lat_016} />
@@ -80,6 +86,7 @@ export default function BridgePopup({ bridge, map }: BridgePopupProps) {
           />
         </div>
 
+        {/* Extended data block (fetched on demand) */}
         {showMore && detailedData && (
           <>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1">

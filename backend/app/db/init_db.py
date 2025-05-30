@@ -6,6 +6,9 @@ from app.db.session import engine
 from app.db.base import Base 
 
 def init_db():
+    """
+    Initializes the database by dropping and creating all tables based on models.py
+    """
     # Drop all tables (if exist) and recreate from metadata
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine) 
