@@ -30,24 +30,6 @@ NBI Bridge Viewer is a full-stack geospatial web application that visualizes bri
 - Optimized tile caching for frontend to avoid redundant fetching
 - Typed and schema-validated API using Pydantic
 
-## Demo Screenshots
-
-Below are some visuals of the working application, showcasing its major features.
-
-### Bridge Map View
-
-Displays bridges as markers on a Leaflet map. Users can pan and zoom to fetch bridges dynamically based on their view.
-
-![Bridge Map View](https://firebasestorage.googleapis.com/v0/b/commit-genie.firebasestorage.app/o/Bridge-app%2Fbridge-app-0.png?alt=media&token=34d80031-3a5c-421a-b301-97963392db0d)
-
----
-
-### Bridge Detail Popup
-
-Clicking a bridge marker brings up a detailed popup showing condition ratings, year built, and other metadata.
-
-![Bridge Detail](https://firebasestorage.googleapis.com/v0/b/commit-genie.firebasestorage.app/o/Bridge-app%2FScreenshot%202025-05-29%20at%202.49.34%E2%80%AFAM.png?alt=media&token=1dbf256c-e357-4bcc-a5b6-c91d3e81e993)
-
 ## System Design Diagram
 
 ```
