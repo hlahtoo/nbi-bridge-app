@@ -39,7 +39,7 @@ export default function MapView() {
     adtOp: Operator;
   }>({
     mainFilter: "lowestRating",
-    limit: 100,
+    limit: 50,
     yearFilter: null,
     yearOp: ">=",
     lowestRating: null,
