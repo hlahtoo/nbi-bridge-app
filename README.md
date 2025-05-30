@@ -38,7 +38,7 @@ Below are some visuals of the working application, showcasing its major features
 
 Displays bridges as markers on a Leaflet map. Users can pan and zoom to fetch bridges dynamically based on their view.
 
-![Bridge Map View](https://firebasestorage.googleapis.com/v0/b/commit-genie.firebasestorage.app/o/Bridge-app%2FScreenshot%202025-05-29%20at%202.49.07%E2%80%AFAM.png?alt=media&token=4a5e48eb-8247-4fdf-ba02-abf9d4129da2)
+![Bridge Map View](https://firebasestorage.googleapis.com/v0/b/commit-genie.firebasestorage.app/o/Bridge-app%2Fbridge-app-0.png?alt=media&token=34d80031-3a5c-421a-b301-97963392db0d)
 
 ---
 
